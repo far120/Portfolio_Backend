@@ -17,11 +17,31 @@ function authenticate(req, res, next) {
 }
 
 function authorizeAdmin(req, res, next) {
-    if (req.user && req.user.role === 'admin') {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
         next();
     } else {
         return next(authorizationError('Not authorized'));
     }
 }
 
-module.exports = { authenticate, authorizeAdmin };
+function authorizeSuperAdmin(req, res, next) {
+    if (req.user && req.user.role === 'superadmin') {
+        next();
+    } else {
+        return next(authorizationError('Superadmin only'));
+    }
+}
+
+function authorizeUserOrAdmin(req, res, next) {
+    // Allow if superadmin
+    if (req.user && req.user.role === 'superadmin') return next();
+    // Allow if admin and resource belongs to him
+    if (req.user && req.user.role === 'admin') {
+        req._ownerOnly = true;
+        return next();
+    }
+    // Deny for others
+    return next(authorizationError('Not authorized'));
+}
+
+module.exports = { authenticate, authorizeAdmin, authorizeSuperAdmin, authorizeUserOrAdmin };

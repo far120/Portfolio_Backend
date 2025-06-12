@@ -20,11 +20,13 @@ const WorkExperienceSchema = new mongoose.Schema({
     },
     description: {
         type: String,
+        required: true,
         trim: true
     },
-    location: {
-        type: String,
-        trim: true
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true

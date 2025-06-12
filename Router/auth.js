@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { registerSchema, loginSchema } = require('../Middlewares/joiSchemas');
 const { validateBody } = require('../Middlewares/validate');
 const { validationError, authenticationError } = require('../Middlewares/Erorr');
+const {authorizeSuperAdmin , authenticate} = require('../Middlewares/auth');
 
 router.post('/register', validateBody(registerSchema), async (req, res, next) => {
     try {
@@ -14,7 +15,7 @@ router.post('/register', validateBody(registerSchema), async (req, res, next) =>
         const exists = await User.findOne({ email });
         if (exists) return next(validationError('Email already registered'));
         const hash = await bcrypt.hash(password, 10);
-        const user = new User({ email, password: hash, role: 'admin' });
+        const user = new User({ email, password: hash, role: 'superadmin' });
         await user.save();
         res.status(201).json({ message: 'User registered' });
     } catch (err) {
@@ -31,6 +32,15 @@ router.post('/login', validateBody(loginSchema), async (req, res, next) => {
         if (!valid) return next(authenticationError('Invalid email or password'));
         const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ token });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/', authenticate , authorizeSuperAdmin , async (req, res, next) => {
+    try {
+        const users = await User.find({}, '-password');
+        res.json(users);
     } catch (err) {
         next(err);
     }

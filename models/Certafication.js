@@ -18,6 +18,11 @@ const CertificationSchema = new mongoose.Schema({
     credentialUrl: {
         type: String,
         trim: true
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true

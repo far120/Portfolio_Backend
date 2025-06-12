@@ -25,6 +25,15 @@ const ProjectSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    screenshots: [{
+        type: String,
+        trim: true
+    }],
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 });
 
